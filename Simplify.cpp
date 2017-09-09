@@ -271,6 +271,17 @@ int main(int argc, char **argv)
 		cv::line(mainWin, cv::Point(x0, y0), cv::Point(x1, y1), cv::Scalar(0,0, 255), 1) ;
 	}
 
+	len=sizeof(simplified)/(2*sizeof(float));
+	for(int i = 0 ; i < len-1 ; i++){
+		int x0 = simplified[i][0];
+		int y0 = simplified[i][1];
+		int x1 = simplified[i+1][0];
+		int y1 = simplified[i+1][1];
+
+		cv::circle(mainWin, cv::Point(x0, y0), 1, Scalar(255,0,0), -1);
+		cv::line(mainWin, cv::Point(x0, y0), cv::Point(x1, y1), cv::Scalar(255,0,0), 1) ;
+	}
+
 	cv::imshow("simplify", mainWin);
     cv::waitKey(0);
 
