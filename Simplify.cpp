@@ -162,7 +162,7 @@ static std::vector<float> simplifyDouglasPeucker(std::vector<float> &input ,
  * points : points[len][2]  for 2D points
  * len :total points, a point is a (x,y) pair
  */
-static std::vector<float> simplify(float (*points)[2], int len, float tolerance, int highestQuality) 
+std::vector<float> simplify(float (*points)[2], int len, float tolerance, int highestQuality) 
 {
 	float sqTolerance = tolerance * tolerance;
 	std::vector<float> outPoints, tmpPoints;
@@ -181,6 +181,24 @@ static std::vector<float> simplify(float (*points)[2], int len, float tolerance,
 	outPoints = simplifyDouglasPeucker(tmpPoints, sqTolerance);
 	printf("<%s:outPoints size=%zu\n",__func__, outPoints.size());
 	return outPoints;
+}
+
+extern "C"{
+/**
+ * @param[IN] points : points[len][2]  for 2D points
+ * @param[IN] len :total points, a point is a (x,y) pair
+ * @param[IN/OUT] output: actually it's output[len][2].
+ * @return : the new simplified points
+ */
+int c_simplify(float (*points)[2], int len, float *output, float tolerance, int highestQuality) 
+{
+	std::vector<float> out= simplify(points, len, tolerance, highestQuality);
+	if(out.empty())
+		return 0;
+	std::copy(out.begin(), out.end(), output);
+	return out.size();
+}
+
 }
 
 int main(int argc, char **argv)
@@ -248,6 +266,9 @@ int main(int argc, char **argv)
 	simPoints = simplify(points, len, tolerance, highestQuality) ;
 	printf("simplify: len=%d, return points=%zu, (%f, %f)\n", len, simPoints.size()/2, simPoints[0], simPoints[1]);
 
+	float output[len][2];
+	int olen = c_simplify(points, len, (float *)output, tolerance, highestQuality) ;
+	
 	int win_height=768, win_width=1024;
 	cv::Mat mainWin( win_height, win_width ,CV_8UC3, Scalar(0,0,0));
 	for(int i = 0 ; i < len-1 ; i++){
